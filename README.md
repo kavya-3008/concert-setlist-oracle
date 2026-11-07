@@ -37,3 +37,7 @@ python3 -m pytest
 ## Config
 
 Copy `.env.example` to `.env` and add `GEMINI_API_KEY`. The key is read from the environment and never committed.
+
+## Live site
+
+https://kavya-3008.github.io/concert-setlist-oracle/ (regenerate with `PYTHONPATH=. python3 scripts/build_site.py`)
