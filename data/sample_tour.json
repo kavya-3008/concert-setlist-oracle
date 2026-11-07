@@ -1,0 +1,434 @@
+[
+ {
+  "date": "2026-02-01",
+  "city": "San Diego",
+  "songs": [
+   "Open Windows",
+   "Last Train Home",
+   "Golden Hour Radio",
+   "Glass Summer",
+   "Weekend Ghosts",
+   "Neon Tides",
+   "Static Hearts",
+   "Paper Moons",
+   "Blue Tarmac",
+   "Salt & Smoke",
+   "Cassette Hymn",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-02",
+  "city": "Los Angeles",
+  "songs": [
+   "Open Windows",
+   "Paper Moons",
+   "Glass Summer",
+   "Slow Parade",
+   "Weekend Ghosts",
+   "Golden Hour Radio",
+   "Last Train Home",
+   "Neon Tides",
+   "Cassette Hymn",
+   "Salt & Smoke",
+   "Velvet Alarm",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-03",
+  "city": "Phoenix",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Slow Parade",
+   "Glass Summer",
+   "Paper Moons",
+   "Golden Hour Radio",
+   "Weekend Ghosts",
+   "Last Train Home",
+   "Salt & Smoke",
+   "Paper Planes",
+   "Velvet Alarm",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-04",
+  "city": "Austin",
+  "songs": [
+   "Open Windows",
+   "Slow Parade",
+   "Glass Summer",
+   "Static Hearts",
+   "Last Train Home",
+   "Weekend Ghosts",
+   "Golden Hour Radio",
+   "Paper Moons",
+   "Lighthouse",
+   "Salt & Smoke",
+   "Cassette Hymn",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-05",
+  "city": "Denver",
+  "songs": [
+   "Open Windows",
+   "Last Train Home",
+   "Static Hearts",
+   "Glass Summer",
+   "Neon Tides",
+   "Paper Moons",
+   "Slow Parade",
+   "Golden Hour Radio",
+   "Blue Tarmac",
+   "Cassette Hymn",
+   "Salt & Smoke",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-06",
+  "city": "Seattle",
+  "songs": [
+   "Open Windows",
+   "Golden Hour Radio",
+   "Glass Summer",
+   "Slow Parade",
+   "Last Train Home",
+   "Static Hearts",
+   "Paper Moons",
+   "Weekend Ghosts",
+   "Salt & Smoke",
+   "Velvet Alarm",
+   "Blue Tarmac",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-07",
+  "city": "Portland",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Golden Hour Radio",
+   "Glass Summer",
+   "Neon Tides",
+   "Slow Parade",
+   "Last Train Home",
+   "Paper Moons",
+   "Salt & Smoke",
+   "Velvet Alarm",
+   "Blue Tarmac",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-08",
+  "city": "Chicago",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Paper Moons",
+   "Last Train Home",
+   "Slow Parade",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Glass Summer",
+   "Lighthouse",
+   "Blue Tarmac",
+   "Paper Planes",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-09",
+  "city": "Boston",
+  "songs": [
+   "Open Windows",
+   "Weekend Ghosts",
+   "Last Train Home",
+   "Paper Moons",
+   "Glass Summer",
+   "Slow Parade",
+   "Neon Tides",
+   "Static Hearts",
+   "Salt & Smoke",
+   "Velvet Alarm",
+   "Paper Planes",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-10",
+  "city": "New York",
+  "songs": [
+   "Open Windows",
+   "Golden Hour Radio",
+   "Slow Parade",
+   "Weekend Ghosts",
+   "Static Hearts",
+   "Glass Summer",
+   "Neon Tides",
+   "Last Train Home",
+   "Cassette Hymn",
+   "Blue Tarmac",
+   "Velvet Alarm",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-11",
+  "city": "San Diego",
+  "songs": [
+   "Open Windows",
+   "Last Train Home",
+   "Golden Hour Radio",
+   "Paper Moons",
+   "Neon Tides",
+   "Glass Summer",
+   "Static Hearts",
+   "Slow Parade",
+   "Lighthouse",
+   "Salt & Smoke",
+   "Cassette Hymn",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-12",
+  "city": "Los Angeles",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Last Train Home",
+   "Weekend Ghosts",
+   "Slow Parade",
+   "Glass Summer",
+   "Paper Moons",
+   "Neon Tides",
+   "Velvet Alarm",
+   "Paper Planes",
+   "Salt & Smoke",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-13",
+  "city": "Phoenix",
+  "songs": [
+   "Open Windows",
+   "Weekend Ghosts",
+   "Last Train Home",
+   "Neon Tides",
+   "Glass Summer",
+   "Slow Parade",
+   "Static Hearts",
+   "Golden Hour Radio",
+   "Salt & Smoke",
+   "Blue Tarmac",
+   "Velvet Alarm",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-14",
+  "city": "Austin",
+  "songs": [
+   "Open Windows",
+   "Last Train Home",
+   "Glass Summer",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Paper Moons",
+   "Static Hearts",
+   "Golden Hour Radio",
+   "Lighthouse",
+   "Paper Planes",
+   "Salt & Smoke",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-15",
+  "city": "Denver",
+  "songs": [
+   "Open Windows",
+   "Last Train Home",
+   "Golden Hour Radio",
+   "Slow Parade",
+   "Glass Summer",
+   "Paper Moons",
+   "Weekend Ghosts",
+   "Static Hearts",
+   "Lighthouse",
+   "Velvet Alarm",
+   "Blue Tarmac",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-16",
+  "city": "Seattle",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Glass Summer",
+   "Last Train Home",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Golden Hour Radio",
+   "Paper Moons",
+   "Velvet Alarm",
+   "Paper Planes",
+   "Salt & Smoke",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-17",
+  "city": "Portland",
+  "songs": [
+   "Open Windows",
+   "Golden Hour Radio",
+   "Glass Summer",
+   "Weekend Ghosts",
+   "Neon Tides",
+   "Last Train Home",
+   "Slow Parade",
+   "Static Hearts",
+   "Lighthouse",
+   "Velvet Alarm",
+   "Paper Planes",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-18",
+  "city": "Chicago",
+  "songs": [
+   "Open Windows",
+   "Golden Hour Radio",
+   "Last Train Home",
+   "Static Hearts",
+   "Slow Parade",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Glass Summer",
+   "Salt & Smoke",
+   "Cassette Hymn",
+   "Blue Tarmac",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-19",
+  "city": "Boston",
+  "songs": [
+   "Open Windows",
+   "Glass Summer",
+   "Slow Parade",
+   "Last Train Home",
+   "Static Hearts",
+   "Weekend Ghosts",
+   "Paper Moons",
+   "Golden Hour Radio",
+   "Blue Tarmac",
+   "Salt & Smoke",
+   "Paper Planes",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-20",
+  "city": "New York",
+  "songs": [
+   "Open Windows",
+   "Slow Parade",
+   "Glass Summer",
+   "Paper Moons",
+   "Weekend Ghosts",
+   "Static Hearts",
+   "Last Train Home",
+   "Neon Tides",
+   "Blue Tarmac",
+   "Cassette Hymn",
+   "Lighthouse",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-21",
+  "city": "San Diego",
+  "songs": [
+   "Open Windows",
+   "Golden Hour Radio",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Static Hearts",
+   "Last Train Home",
+   "Glass Summer",
+   "Slow Parade",
+   "Salt & Smoke",
+   "Cassette Hymn",
+   "Lighthouse",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-22",
+  "city": "Los Angeles",
+  "songs": [
+   "Open Windows",
+   "Static Hearts",
+   "Last Train Home",
+   "Glass Summer",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Golden Hour Radio",
+   "Paper Moons",
+   "Paper Planes",
+   "Cassette Hymn",
+   "Blue Tarmac",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-23",
+  "city": "Phoenix",
+  "songs": [
+   "Open Windows",
+   "Weekend Ghosts",
+   "Neon Tides",
+   "Static Hearts",
+   "Golden Hour Radio",
+   "Last Train Home",
+   "Glass Summer",
+   "Paper Moons",
+   "Salt & Smoke",
+   "Lighthouse",
+   "Paper Planes",
+   "Everyone Sings"
+  ]
+ },
+ {
+  "date": "2026-02-24",
+  "city": "Austin",
+  "songs": [
+   "Open Windows",
+   "Glass Summer",
+   "Neon Tides",
+   "Weekend Ghosts",
+   "Static Hearts",
+   "Golden Hour Radio",
+   "Paper Moons",
+   "Slow Parade",
+   "Cassette Hymn",
+   "Blue Tarmac",
+   "Velvet Alarm",
+   "Everyone Sings"
+  ]
+ }
+]
