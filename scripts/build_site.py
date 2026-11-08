@@ -3,13 +3,21 @@ from html import escape
 from pathlib import Path
 
 from oracle.data import load_shows
-from oracle.evaluate import backtest
+from oracle.calibration import brier, probability_pairs, reliability
+from oracle.evaluate import compare
+from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
+from oracle.recency import RecencyModel
 
 ROOT = Path(__file__).resolve().parent.parent
 shows = load_shows(ROOT / "data/sample_tour.json")
-model = SetlistModel().fit(shows)
-bt = backtest(shows)
+model = MarkovModel().fit(shows)
+res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel})
+pairs = list(probability_pairs(shows))
+br = brier(pairs)
+rel = reliability(pairs)
+cmp_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['overlap']:.0%}</td><td>{r['order']:.0%}</td></tr>" for n, r in res.items())
+rel_rows = ''.join(f"<tr><td>{b['bin']}</td><td>{b['predicted']:.0%}</td><td>{b['observed']:.0%}</td><td>{b['n']}</td></tr>" for b in rel)
 
 setlist = "".join(f"<li>{escape(s)}</li>" for s in model.predict())
 surprise = "".join(f"<li>{escape(s)}</li>" for s in model.surprise_candidates())
@@ -37,8 +45,12 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note">Demo data is a synthetic tour by a fictional band ({len(shows)} shows). <a href="https://github.com/kavya-3008/concert-setlist-oracle">Source on GitHub</a>.</p>
 <div class="grid"><div class="card"><h2 style="margin-top:0">Predicted setlist</h2><ol>{setlist}</ol></div>
 <div><div class="card"><h2 style="margin-top:0">Surprise candidates</h2><ul>{surprise}</ul></div>
-<div class="card" style="margin-top:16px"><h2 style="margin-top:0">Backtest</h2><div class="stat">{bt['mean_overlap']:.0%}</div>
-<p class="note" style="margin:0">of each real setlist recovered, predicting {bt['shows_scored']} shows using only the shows before each one.</p></div></div></div>
+<div class="card" style="margin-top:16px"><h2 style="margin-top:0">Best backtest</h2><div class="stat">{max(r['overlap'] for r in res.values()):.0%}</div>
+<p class="note" style="margin:0">of each real setlist recovered, predicting every show from only the shows before it.</p></div></div></div>
+<h2>Model comparison</h2><div class="card"><table><tr><th>Model</th><th>Songs recovered</th><th>Order accuracy</th></tr>{cmp_rows}</table>
+<p class="note">Order accuracy: of the songs both lists share, how many pairs are in the right relative order. Markov ordering does worse here because mid-set order in this synthetic tour is random; real tours should differ.</p></div>
+<h2>Are the probabilities honest?</h2><div class="card"><table><tr><th>Predicted bin</th><th>Avg predicted</th><th>Actually played</th><th>Cases</th></tr>{rel_rows}</table>
+<p class="note">Brier score: {br:.3f} (lower is better). Well-calibrated means the two percentage columns match.</p></div>
 <h2>Every song</h2><div class="card"><table><tr><th>Song</th><th>Play rate</th><th></th><th>Set position</th></tr>{rows}</table>
 <p class="note">Set position: 0 = opener, 1 = closer.</p></div></main></body></html>"""
 (ROOT / "docs/index.html").write_text(html)

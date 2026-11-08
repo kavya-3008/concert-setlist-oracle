@@ -15,6 +15,16 @@ python3 -m pytest
 
 `data/sample_tour.json` is **synthetic** (a fictional band) so the project runs offline.
 
+## Findings so far (synthetic tour with drift)
+
+| Model | Songs recovered | Order accuracy |
+|---|---|---|
+| Frequency | 73% | 77% |
+| Recency-weighted | 76% | 77% |
+| Recency + Markov order | 76% | 67% |
+
+Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
+
 ## How it works (v0.1)
 
 - **Play rate**: fraction of shows a song appears in. High means a staple.
@@ -27,9 +37,12 @@ python3 -m pytest
 
 - [x] Baseline frequency/position model + backtest
 - [ ] Fetch real tours from the setlist.fm API
+- [x] Recency-weighted probabilities (tours drift)
+- [x] Markov ordering model, compared in the backtest (does not beat the baseline on synthetic data)
+- [x] Calibration: reliability bins and Brier score
 - [ ] Per-slot model (opener, closer, encore, "surprise slot")
-- [ ] Sequence model (Markov / small transformer) and compare against the baseline in the backtest
-- [ ] Calibrated probabilities per song, with reliability plots
+- [ ] Recalibrate probabilities (isotonic / Platt) if the reliability table shows bias
+- [ ] Small transformer over song sequences, only if real data shows order structure
 - [ ] Gemini-written explanations for each pick ("why this song?")
 - [ ] City effects: do tours rotate songs by region?
 - [ ] Small web UI

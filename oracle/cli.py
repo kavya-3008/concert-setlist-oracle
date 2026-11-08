@@ -4,8 +4,10 @@ from __future__ import annotations
 import argparse
 
 from .data import load_shows
-from .evaluate import backtest
+from .evaluate import backtest, compare
+from .markov import MarkovModel
 from .model import SetlistModel
+from .recency import RecencyModel
 
 
 def main() -> None:
@@ -14,15 +16,17 @@ def main() -> None:
     args = ap.parse_args()
 
     shows = load_shows(args.data)
-    model = SetlistModel().fit(shows)
+    model = MarkovModel().fit(shows)
 
     print(f"Trained on {len(shows)} shows.\n\nPredicted setlist:")
     for i, song in enumerate(model.predict(), 1):
         print(f"  {i:>2}. {song}")
     print("\nSurprise song candidates:", ", ".join(model.surprise_candidates()) or "none")
     if len(shows) > 5:
-        r = backtest(shows)
-        print(f"\nBacktest over {r['shows_scored']} shows: {r['mean_overlap']:.0%} of each real setlist predicted")
+        res = compare(shows, {"frequency": SetlistModel, "recency": RecencyModel, "markov": MarkovModel})
+        print("\nBacktest (rolling, predicts each show from the ones before it):")
+        for name, r in res.items():
+            print(f"  {name:<10} songs recovered {r['overlap']:.0%}   order accuracy {r['order']:.0%}")
 
 
 if __name__ == "__main__":
