@@ -25,6 +25,17 @@ python3 -m pytest
 
 Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
 
+### Recalibration (isotonic)
+
+The reliability table showed the recency model is underconfident for rare songs (predicted ~7%, played ~28%) and overconfident for staples (predicted ~98%, played ~92%). An isotonic calibrator (pool-adjacent-violators) fixes that shape. To avoid leaking, each held-out show is recalibrated using only earlier held-out folds, and the first 3 folds are skipped as warm-up (464 song-show cases scored).
+
+| Probabilities | Brier score |
+|---|---|
+| Raw recency model | 0.2003 |
+| Isotonic-recalibrated | 0.1975 |
+
+That is only about a 1.4% improvement on 36 synthetic shows. The calibrator has little data to learn from, so treat it as a modest, unproven gain; it needs a real, longer tour to judge.
+
 ## How it works (v0.1)
 
 - **Play rate**: fraction of shows a song appears in. High means a staple.
@@ -41,7 +52,7 @@ Recency helps because songs enter and leave rotation. Markov ordering hurts here
 - [x] Markov ordering model, compared in the backtest (does not beat the baseline on synthetic data)
 - [x] Calibration: reliability bins and Brier score
 - [ ] Per-slot model (opener, closer, encore, "surprise slot")
-- [ ] Recalibrate probabilities (isotonic / Platt) if the reliability table shows bias
+- [x] Recalibrate probabilities (isotonic regression, evaluated out-of-sample): small gain only
 - [ ] Small transformer over song sequences, only if real data shows order structure
 - [ ] Gemini-written explanations for each pick ("why this song?")
 - [ ] City effects: do tours rotate songs by region?
