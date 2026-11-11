@@ -68,3 +68,22 @@ def test_recalibrated_pairs_align_and_bounded():
     assert len(raw) == len(cal) > 0
     assert all(0 <= p <= 1 for p, _ in cal)
     assert [y for _, y in raw] == [y for _, y in cal]
+
+
+def test_slot_model_predicts_opener_and_closer_separately():
+    from oracle.slots import SlotModel
+
+    shows = [Show(f"2026-03-{i + 1:02d}", "X", ("Open", "A", "B", "Close")) for i in range(6)]
+    # Most recent shows swap the closer: decay should pick it up.
+    shows += [Show(f"2026-03-{i + 7:02d}", "X", ("Open", "B", "A", "New Close")) for i in range(6)]
+    pred = SlotModel(decay=0.7).fit(shows).predict(length=4)
+    assert pred[0] == "Open" and pred[-1] == "New Close" and len(pred) == 4 and len(set(pred)) == 4
+
+
+def test_slot_accuracy_perfect_on_constant_tour():
+    from oracle.evaluate import slot_accuracy
+    from oracle.slots import SlotModel
+
+    shows = [Show(f"2026-04-{i + 1:02d}", "X", ("O", "M", "C")) for i in range(8)]
+    r = slot_accuracy(shows, SlotModel)
+    assert r == {"opener": 1.0, "closer": 1.0, "overlap": 1.0}
