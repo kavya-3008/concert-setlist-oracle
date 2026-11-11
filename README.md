@@ -22,6 +22,7 @@ python3 -m pytest
 | Frequency | 73% | 77% |
 | Recency-weighted | 76% | 77% |
 | Recency + Markov order | 76% | 67% |
+| Per-slot (opener/closer) | 76% | 77% |
 
 Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
 
@@ -35,6 +36,18 @@ The reliability table showed the recency model is underconfident for rare songs 
 | Isotonic-recalibrated | 0.1975 |
 
 That is only about a 1.4% improvement on 36 synthetic shows. The calibrator has little data to learn from, so treat it as a modest, unproven gain; it needs a real, longer tour to judge.
+
+### Per-slot model (opener / closer)
+
+`SlotModel` picks the opener and closer from recency-weighted slot frequencies, then fills the middle with the most probable remaining songs. Backtest on the synthetic tour (31 shows scored):
+
+| Model | Opener exact | Closer exact | Songs recovered |
+|---|---|---|---|
+| Frequency | 100% | 100% | 72.7% |
+| Recency-weighted | 100% | 100% | 75.5% |
+| Per-slot | 100% | 100% | 75.5% |
+
+Negative result: no gain. In this synthetic tour the opener and closer never change, so every model already gets them right, and the slot model reduces to the recency model. The test is not informative about real tours, where openers and closers rotate; the model is kept (with unit tests on a drifting closer) so it can be evaluated once real setlists are available.
 
 ## How it works (v0.1)
 
@@ -51,7 +64,7 @@ That is only about a 1.4% improvement on 36 synthetic shows. The calibrator has 
 - [x] Recency-weighted probabilities (tours drift)
 - [x] Markov ordering model, compared in the backtest (does not beat the baseline on synthetic data)
 - [x] Calibration: reliability bins and Brier score
-- [ ] Per-slot model (opener, closer, encore, "surprise slot")
+- [x] Per-slot model: opener and closer predicted separately (ties the recency model on synthetic data; encore/surprise slots still open)
 - [x] Recalibrate probabilities (isotonic regression, evaluated out-of-sample): small gain only
 - [ ] Small transformer over song sequences, only if real data shows order structure
 - [ ] Gemini-written explanations for each pick ("why this song?")

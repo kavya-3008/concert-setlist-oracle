@@ -41,3 +41,18 @@ def compare(shows: list[Show], factories: dict, min_history: int = 5) -> dict[st
             orders.append(order_score(predicted, actual))
         out[name] = {"overlap": sum(overlaps) / len(overlaps), "order": sum(orders) / len(orders)}
     return out
+
+
+def slot_accuracy(shows: list[Show], make, min_history: int = 5) -> dict[str, float]:
+    """How often the predicted opener and closer are exactly right, plus overall song overlap."""
+    op = cl = ov = 0.0
+    k = len(shows) - min_history
+    if k <= 0:
+        raise ValueError("not enough shows to backtest")
+    for i in range(min_history, len(shows)):
+        actual = shows[i].songs
+        pred = make().fit(shows[:i]).predict(length=len(actual))
+        op += pred[0] == actual[0]
+        cl += pred[-1] == actual[-1]
+        ov += len(set(actual) & set(pred)) / len(actual)
+    return {"opener": op / k, "closer": cl / k, "overlap": ov / k}
