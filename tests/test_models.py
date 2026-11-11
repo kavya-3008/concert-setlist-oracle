@@ -40,3 +40,31 @@ def test_calibration_outputs_are_sane():
 def test_compare_returns_all_models():
     res = compare(drifting_tour(), {"freq": SetlistModel, "recency": RecencyModel, "markov": MarkovModel}, min_history=4)
     assert set(res) == {"freq", "recency", "markov"}
+
+
+def test_isotonic_is_monotone_and_fixes_bias():
+    from oracle.calibration import IsotonicCalibrator
+
+    # Events at p=0.2 happen half the time; at p=0.8 they happen 90% of the time.
+    pairs = [(0.2, 1.0)] * 5 + [(0.2, 0.0)] * 5 + [(0.8, 1.0)] * 9 + [(0.8, 0.0)]
+    cal = IsotonicCalibrator().fit(pairs)
+    assert abs(cal.transform(0.2) - 0.5) < 1e-9
+    assert abs(cal.transform(0.8) - 0.9) < 1e-9
+    grid = [cal.transform(x / 20) for x in range(21)]
+    assert grid == sorted(grid)
+
+
+def test_isotonic_pools_violations():
+    from oracle.calibration import IsotonicCalibrator
+
+    cal = IsotonicCalibrator().fit([(0.1, 1.0), (0.5, 0.0), (0.9, 1.0)])
+    assert cal.ys == sorted(cal.ys)
+
+
+def test_recalibrated_pairs_align_and_bounded():
+    from oracle.calibration import recalibrated_pairs
+
+    raw, cal = recalibrated_pairs(drifting_tour(), min_history=3, warmup=2)
+    assert len(raw) == len(cal) > 0
+    assert all(0 <= p <= 1 for p, _ in cal)
+    assert [y for _, y in raw] == [y for _, y in cal]
