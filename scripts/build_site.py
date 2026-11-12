@@ -2,6 +2,7 @@
 from html import escape
 from pathlib import Path
 
+from oracle.city import CityModel
 from oracle.data import load_shows
 from oracle.calibration import brier, probability_pairs, recalibrated_pairs, reliability
 from oracle.evaluate import compare
@@ -13,7 +14,7 @@ from oracle.slots import SlotModel
 ROOT = Path(__file__).resolve().parent.parent
 shows = load_shows(ROOT / "data/sample_tour.json")
 model = MarkovModel().fit(shows)
-res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel})
+res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel})
 pairs = list(probability_pairs(shows))
 br = brier(pairs)
 rel = reliability(pairs)
