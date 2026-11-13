@@ -36,7 +36,10 @@ def compare(shows: list[Show], factories: dict, min_history: int = 5) -> dict[st
         for i in range(min_history, len(shows)):
             model = make().fit(shows[:i])
             actual = shows[i].songs
-            predicted = model.predict(length=len(actual))
+            if getattr(model, "uses_city", False):
+                predicted = model.predict(length=len(actual), city=shows[i].city)
+            else:
+                predicted = model.predict(length=len(actual))
             overlaps.append(len(set(actual) & set(predicted)) / len(actual))
             orders.append(order_score(predicted, actual))
         out[name] = {"overlap": sum(overlaps) / len(overlaps), "order": sum(orders) / len(orders)}
