@@ -68,6 +68,17 @@ The recency model's decay (0.85) was a guess. `TunedRecencyModel` re-selects it 
 
 Negative result: tuning is a tie (+0.07 points of overlap, well within noise on 31 shows). The best fixed decay in hindsight (0.6) is about one point better, but the sweep is flat enough that a single show swings it, and the tuner mostly picked 1.0 early on (little drift visible yet) and 0.6 late. The tuner is kept because it removes a hand-set knob and should matter on real tours whose drift speed is unknown.
 
+### Error analysis
+
+`error_analysis` splits backtest misses into *unreachable* (song never played earlier in the tour, so no history-based model can name it) and *reachable* (seen before, but left out of the prediction), and lists the most-missed and most-wrongly-picked songs. On the synthetic tour (31 shows scored, overlap pooled over all played songs rather than averaged per show, so it differs slightly from the tables above):
+
+| Model | Songs recovered | Ceiling (seen-only) | Misses that were unreachable |
+|---|---|---|---|
+| Frequency | 72.9% | 99.3% | 2.2% |
+| Recency-weighted | 75.9% | 99.3% | 2.5% |
+
+Finding: the ceiling is ~99%, so almost all of the ~24% miss is reachable rotation error, not unseen songs. The weakness is deciding which rotating songs play on a given night, not cold start. Both models keep missing and over-picking the same mid-rotation songs (e.g. Last Train Home, Glass Summer, Paper Planes), which are roughly coin flips in this generator. Nothing here beats the baseline; it is a diagnostic and points future modeling effort at the rotating slots, not at surprise songs.
+
 ## How it works (v0.1)
 
 - **Play rate**: fraction of shows a song appears in. High means a staple.
@@ -89,6 +100,7 @@ Negative result: tuning is a tie (+0.07 points of overlap, well within noise on 
 - [ ] Gemini-written explanations for each pick ("why this song?")
 - [x] City effects: do tours rotate songs by region? (shrunk per-city model; loses to recency on synthetic data, which has no regional structure)
 - [x] Tune the recency decay without leakage (inner walk-forward; ties the fixed 0.85 on synthetic data)
+- [x] Error analysis: reachable vs unreachable misses, most-missed songs (shown on the site)
 - [ ] Small web UI
 
 ## Config

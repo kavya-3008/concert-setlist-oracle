@@ -5,6 +5,7 @@ from pathlib import Path
 from oracle.city import CityModel
 from oracle.data import load_shows
 from oracle.calibration import brier, probability_pairs, recalibrated_pairs, reliability
+from oracle.errors import error_analysis
 from oracle.evaluate import compare
 from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
@@ -21,6 +22,9 @@ br = brier(pairs)
 rel = reliability(pairs)
 raw_cv, cal_cv = recalibrated_pairs(shows)
 br_raw, br_cal = brier(raw_cv), brier(cal_cv)
+ea = error_analysis(shows, RecencyModel)
+miss_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_missed'])
+spur_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_spurious'])
 cmp_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['overlap']:.0%}</td><td>{r['order']:.0%}</td></tr>" for n, r in res.items())
 rel_rows = ''.join(f"<tr><td>{b['bin']}</td><td>{b['predicted']:.0%}</td><td>{b['observed']:.0%}</td><td>{b['n']}</td></tr>" for b in rel)
 
@@ -54,6 +58,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note" style="margin:0">of each real setlist recovered, predicting every show from only the shows before it.</p></div></div></div>
 <h2>Model comparison</h2><div class="card"><table><tr><th>Model</th><th>Songs recovered</th><th>Order accuracy</th></tr>{cmp_rows}</table>
 <p class="note">Order accuracy: of the songs both lists share, how many pairs are in the right relative order. Markov ordering does worse here because mid-set order in this synthetic tour is random; real tours should differ.</p></div>
+<h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
+<div class="grid"><div><table><tr><th>Most often missed</th><th>Shows</th></tr>{miss_rows}</table></div><div><table><tr><th>Most often wrongly picked</th><th>Shows</th></tr>{spur_rows}</table></div></div></div>
 <h2>Are the probabilities honest?</h2><div class="card"><table><tr><th>Predicted bin</th><th>Avg predicted</th><th>Actually played</th><th>Cases</th></tr>{rel_rows}</table>
 <p class="note">Brier score: {br:.3f} (lower is better). Well-calibrated means the two percentage columns match. Isotonic recalibration (fit only on earlier shows) moves Brier from {br_raw:.4f} to {br_cal:.4f} on the same cases after a 3-fold warm-up: a small gain on this synthetic tour.</p></div>
 <h2>Every song</h2><div class="card"><table><tr><th>Song</th><th>Play rate</th><th></th><th>Set position</th></tr>{rows}</table>
