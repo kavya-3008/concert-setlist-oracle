@@ -25,6 +25,7 @@ python3 -m pytest
 | Per-slot (opener/closer) | 76% | 77% |
 | Recency + city (k=3) | 73% | 78% |
 | Recency, auto-tuned decay | 76% | 78% |
+| Recency + linear trend | 75% | 77% |
 
 Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
 
@@ -68,6 +69,22 @@ The recency model's decay (0.85) was a guess. `TunedRecencyModel` re-selects it 
 
 Negative result: tuning is a tie (+0.07 points of overlap, well within noise on 31 shows). The best fixed decay in hindsight (0.6) is about one point better, but the sweep is flat enough that a single show swings it, and the tuner mostly picked 1.0 early on (little drift visible yet) and 0.6 late. The tuner is kept because it removes a hand-set knob and should matter on real tours whose drift speed is unknown.
 
+### Linear trend forecast
+
+`TrendModel` asks whether a song's rate is *heading* somewhere rather than just where it has been: for each song it fits a decay-weighted straight line to its 0/1 presence over show index, forecasts one step ahead (clipped to [0, 1]) and blends that with the recency probability (`shrink` = share of trend). The synthetic tour phases songs in and out linearly, so this is the case where trend should help. Backtest (31 shows), songs recovered / order accuracy:
+
+| Model | Songs recovered | Order accuracy |
+|---|---|---|
+| Recency (decay 0.85) | 75.5% | 76.5% |
+| Trend, decay 0.9, shrink 0.5 (default) | 75.2% | 77.2% |
+| Trend, decay 0.8, shrink 0.5 | 74.8% | 77.6% |
+| Trend, decay 0.8, shrink 1.0 | 74.1% | 78.5% |
+| Trend, decay 0.9, shrink 1.0 | 73.6% | 77.9% |
+| Trend, decay 1.0, shrink 0.5 | 73.9% | 77.7% |
+| Trend, decay 1.0, shrink 1.0 | 75.7% | 77.5% |
+
+Negative result: no reliable gain. Across six settings song recovery ranges from 73.6% to 75.7% against 75.5% for plain recency, with no pattern in the settings (the single best one, +0.2 points, was picked in hindsight on 31 shows and is noise). Per-song 0/1 series are too noisy for a slope to be estimated from a few dozen shows, and the extrapolation mainly adds variance. Order accuracy moves up by about one point, but that comes from ranking probabilities differently, not from better song choice, so I would not read much into it. Kept as an informative baseline with unit tests for when a longer real tour is available.
+
 ### Error analysis
 
 `error_analysis` splits backtest misses into *unreachable* (song never played earlier in the tour, so no history-based model can name it) and *reachable* (seen before, but left out of the prediction), and lists the most-missed and most-wrongly-picked songs. On the synthetic tour (31 shows scored, overlap pooled over all played songs rather than averaged per show, so it differs slightly from the tables above):
@@ -96,6 +113,7 @@ Finding: the ceiling is ~99%, so almost all of the ~24% miss is reachable rotati
 - [x] Calibration: reliability bins and Brier score
 - [x] Per-slot model: opener and closer predicted separately (ties the recency model on synthetic data; encore/surprise slots still open)
 - [x] Recalibrate probabilities (isotonic regression, evaluated out-of-sample): small gain only
+- [x] Trend forecast: extrapolate each song's rate with a weighted line (ties recency on synthetic data)
 - [ ] Small transformer over song sequences, only if real data shows order structure
 - [ ] Gemini-written explanations for each pick ("why this song?")
 - [x] City effects: do tours rotate songs by region? (shrunk per-city model; loses to recency on synthetic data, which has no regional structure)

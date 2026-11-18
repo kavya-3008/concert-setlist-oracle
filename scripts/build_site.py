@@ -11,12 +11,13 @@ from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
 from oracle.recency import RecencyModel
 from oracle.slots import SlotModel
+from oracle.trend import TrendModel
 from oracle.tuning import TunedRecencyModel
 
 ROOT = Path(__file__).resolve().parent.parent
 shows = load_shows(ROOT / "data/sample_tour.json")
 model = MarkovModel().fit(shows)
-res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel})
+res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel})
 pairs = list(probability_pairs(shows))
 br = brier(pairs)
 rel = reliability(pairs)
