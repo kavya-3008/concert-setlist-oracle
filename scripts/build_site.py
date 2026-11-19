@@ -6,6 +6,7 @@ from oracle.city import CityModel
 from oracle.data import load_shows
 from oracle.calibration import brier, probability_pairs, recalibrated_pairs, reliability
 from oracle.errors import error_analysis
+from oracle.explain import gather_evidence, TemplateExplainer
 from oracle.evaluate import compare
 from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
@@ -31,6 +32,7 @@ rel_rows = ''.join(f"<tr><td>{b['bin']}</td><td>{b['predicted']:.0%}</td><td>{b[
 
 setlist = "".join(f"<li>{escape(s)}</li>" for s in model.predict())
 surprise = "".join(f"<li>{escape(s)}</li>" for s in model.surprise_candidates())
+why_rows = ''.join(f"<tr><td>{escape(e.song)}</td><td>{e.probability:.0%}</td><td>{escape(TemplateExplainer().explain(e).split(': ', 1)[1])}</td></tr>" for e in gather_evidence(shows, model.predict()))
 rows = "".join(
     f'<tr><td>{escape(s.song)}</td><td><div class="bar"><span style="width:{s.play_rate*100:.0f}%"></span></div></td>'
     f"<td>{s.play_rate:.0%}</td><td>{s.mean_pos:.2f}</td></tr>"
@@ -57,6 +59,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <div><div class="card"><h2 style="margin-top:0">Surprise candidates</h2><ul>{surprise}</ul></div>
 <div class="card" style="margin-top:16px"><h2 style="margin-top:0">Best backtest</h2><div class="stat">{max(r['overlap'] for r in res.values()):.0%}</div>
 <p class="note" style="margin:0">of each real setlist recovered, predicting every show from only the shows before it.</p></div></div></div>
+<h2>Why these picks?</h2><div class="card"><table><tr><th>Song</th><th>Chance</th><th>Evidence</th></tr>{why_rows}</table>
+<p class="note">Written from the tour's own counts. An optional Gemini explainer can rephrase the same evidence when a key is set; it is not used on this page.</p></div>
 <h2>Model comparison</h2><div class="card"><table><tr><th>Model</th><th>Songs recovered</th><th>Order accuracy</th></tr>{cmp_rows}</table>
 <p class="note">Order accuracy: of the songs both lists share, how many pairs are in the right relative order. Markov ordering does worse here because mid-set order in this synthetic tour is random; real tours should differ.</p></div>
 <h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
