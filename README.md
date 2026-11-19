@@ -96,6 +96,12 @@ Negative result: no reliable gain. Across six settings song recovery ranges from
 
 Finding: the ceiling is ~99%, so almost all of the ~24% miss is reachable rotation error, not unseen songs. The weakness is deciding which rotating songs play on a given night, not cold start. Both models keep missing and over-picking the same mid-rotation songs (e.g. Last Train Home, Glass Summer, Paper Planes), which are roughly coin flips in this generator. Nothing here beats the baseline; it is a diagnostic and points future modeling effort at the rotating slots, not at surprise songs.
 
+### Explanations ("why this song?")
+
+`oracle/explain.py` gathers per-pick evidence from the shows (play count, recent appearances, shows since last played, recency-weighted probability) and renders it as a sentence. `TemplateExplainer` works offline and is what the site uses. `GeminiExplainer` asks an LLM to rephrase the same facts, takes an injectable `generate` callable, and falls back to the template when there is no `GEMINI_API_KEY` or the call fails. Because the numbers come from code, not from the model, an explanation cannot invent statistics.
+
+This changes no predictions, so there is nothing to backtest: it is a presentation feature. The Gemini path is only unit-tested against a mock and has not been run against the real API.
+
 ## How it works (v0.1)
 
 - **Play rate**: fraction of shows a song appears in. High means a staple.
@@ -115,7 +121,7 @@ Finding: the ceiling is ~99%, so almost all of the ~24% miss is reachable rotati
 - [x] Recalibrate probabilities (isotonic regression, evaluated out-of-sample): small gain only
 - [x] Trend forecast: extrapolate each song's rate with a weighted line (ties recency on synthetic data)
 - [ ] Small transformer over song sequences, only if real data shows order structure
-- [ ] Gemini-written explanations for each pick ("why this song?")
+- [x] Explanations for each pick ("why this song?"): evidence computed from the shows, offline template explainer, optional Gemini rephrasing behind an injectable interface (tested with a mock; no live Gemini call has been made)
 - [x] City effects: do tours rotate songs by region? (shrunk per-city model; loses to recency on synthetic data, which has no regional structure)
 - [x] Tune the recency decay without leakage (inner walk-forward; ties the fixed 0.85 on synthetic data)
 - [x] Error analysis: reachable vs unreachable misses, most-missed songs (shown on the site)
