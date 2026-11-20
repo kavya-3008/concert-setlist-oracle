@@ -8,6 +8,7 @@ from oracle.calibration import brier, probability_pairs, recalibrated_pairs, rel
 from oracle.errors import error_analysis
 from oracle.explain import gather_evidence, TemplateExplainer
 from oracle.evaluate import compare
+from oracle.length import LENGTH_FORECASTERS, length_backtest
 from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
 from oracle.recency import RecencyModel
@@ -24,6 +25,7 @@ br = brier(pairs)
 rel = reliability(pairs)
 raw_cv, cal_cv = recalibrated_pairs(shows)
 br_raw, br_cal = brier(raw_cv), brier(cal_cv)
+len_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['mae']:.2f}</td><td>{r['bias']:+.2f}</td><td>{r['f1']:.1%}</td></tr>" for n, r in ((n, length_backtest(shows, f)) for n, f in LENGTH_FORECASTERS.items()))
 ea = error_analysis(shows, RecencyModel)
 miss_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_missed'])
 spur_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_spurious'])
@@ -63,6 +65,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note">Written from the tour's own counts. An optional Gemini explainer can rephrase the same evidence when a key is set; it is not used on this page.</p></div>
 <h2>Model comparison</h2><div class="card"><table><tr><th>Model</th><th>Songs recovered</th><th>Order accuracy</th></tr>{cmp_rows}</table>
 <p class="note">Order accuracy: of the songs both lists share, how many pairs are in the right relative order. Markov ordering does worse here because mid-set order in this synthetic tour is random; real tours should differ.</p></div>
+<h2>How long will the show be?</h2><div class="card"><table><tr><th>Length forecast</th><th>Avg error (songs)</th><th>Bias</th><th>F1 of predicted set</th></tr>{len_rows}</table>
+<p class="note">Other tables are told the true set length; here the length is forecast first. Recent-weighted forecasts track the synthetic tour's growing sets; the overall mean runs short.</p></div>
 <h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
 <div class="grid"><div><table><tr><th>Most often missed</th><th>Shows</th></tr>{miss_rows}</table></div><div><table><tr><th>Most often wrongly picked</th><th>Shows</th></tr>{spur_rows}</table></div></div></div>
 <h2>Are the probabilities honest?</h2><div class="card"><table><tr><th>Predicted bin</th><th>Avg predicted</th><th>Actually played</th><th>Cases</th></tr>{rel_rows}</table>
