@@ -1,5 +1,7 @@
 # Concert Setlist Oracle
 
+[![tests](https://github.com/kavya-3008/concert-setlist-oracle/actions/workflows/tests.yml/badge.svg)](https://github.com/kavya-3008/concert-setlist-oracle/actions/workflows/tests.yml) · **[Live demo](https://kavya-3008.github.io/concert-setlist-oracle/)**
+
 Predict tonight's setlist from a tour's past shows, and guess which "surprise song" might show up.
 
 Tours are surprisingly regular: most artists play a core set every night and rotate a handful of slots.
