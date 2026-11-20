@@ -96,6 +96,19 @@ Negative result: no reliable gain. Across six settings song recovery ranges from
 
 Finding: the ceiling is ~99%, so almost all of the ~24% miss is reachable rotation error, not unseen songs. The weakness is deciding which rotating songs play on a given night, not cold start. Both models keep missing and over-picking the same mid-rotation songs (e.g. Last Train Home, Glass Summer, Paper Planes), which are roughly coin flips in this generator. Nothing here beats the baseline; it is a diagnostic and points future modeling effort at the rotating slots, not at surprise songs.
 
+### Set-length forecasting
+
+Every backtest above is handed the true set length, which nobody has before the show. `oracle/length.py` forecasts it from past shows and scores the whole pipeline (forecast length, then predict that many recency-model songs) with precision, recall and F1. In the synthetic tour sets grow from about 9-11 songs early to 10-13 late. Backtest, 31 shows:
+
+| Length forecast | Mean abs. error (songs) | Bias | F1 |
+|---|---|---|---|
+| Overall mean | 1.10 | -0.58 | 73.7% |
+| Decayed mean (0.85) | 0.97 | -0.19 | 75.1% |
+| Last 5 shows | 1.10 | -0.13 | 75.5% |
+| (reference: true length given) | 0 | 0 | 75.5% |
+
+Result: a recency-aware length forecast recovers nearly all of the loss from not knowing the length (F1 75.1-75.5% vs 75.5% with the true length), while the plain mean, the current CLI default, under-predicts by about half a song and costs about 1.8 points of F1. Caveats: the gaps between the two recency-aware forecasters are within noise on 31 shows, a decay sweep (0.5 to 0.9) moved F1 only between 74.9% and 75.7%, and mean absolute error is not better for the last-5 forecaster than the overall mean (the gain is in bias, which is what shifts precision against recall). The sum of the recency model's probabilities is mathematically identical to the decayed mean length, so it is not a separate row. Also, F1 with a true length equals the overlap metric used elsewhere, so the real finding is that length error costs under 2 points here.
+
 ### Explanations ("why this song?")
 
 `oracle/explain.py` gathers per-pick evidence from the shows (play count, recent appearances, shows since last played, recency-weighted probability) and renders it as a sentence. `TemplateExplainer` works offline and is what the site uses. `GeminiExplainer` asks an LLM to rephrase the same facts, takes an injectable `generate` callable, and falls back to the template when there is no `GEMINI_API_KEY` or the call fails. Because the numbers come from code, not from the model, an explanation cannot invent statistics.
@@ -125,6 +138,7 @@ This changes no predictions, so there is nothing to backtest: it is a presentati
 - [x] City effects: do tours rotate songs by region? (shrunk per-city model; loses to recency on synthetic data, which has no regional structure)
 - [x] Tune the recency decay without leakage (inner walk-forward; ties the fixed 0.85 on synthetic data)
 - [x] Error analysis: reachable vs unreachable misses, most-missed songs (shown on the site)
+- [x] Set-length forecasting: predict how many songs, score the full pipeline with F1 (recency-aware forecast nearly matches knowing the true length; shown on the site)
 - [ ] Small web UI
 
 ## Config
