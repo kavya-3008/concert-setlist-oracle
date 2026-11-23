@@ -111,6 +111,18 @@ Every backtest above is handed the true set length, which nobody has before the 
 
 Result: a recency-aware length forecast recovers nearly all of the loss from not knowing the length (F1 75.1-75.5% vs 75.5% with the true length), while the plain mean, the current CLI default, under-predicts by about half a song and costs about 1.8 points of F1. Caveats: the gaps between the two recency-aware forecasters are within noise on 31 shows, a decay sweep (0.5 to 0.9) moved F1 only between 74.9% and 75.7%, and mean absolute error is not better for the last-5 forecaster than the overall mean (the gain is in bias, which is what shifts precision against recall). The sum of the recency model's probabilities is mathematically identical to the decayed mean length, so it is not a separate row. Also, F1 with a true length equals the overlap metric used elsewhere, so the real finding is that length error costs under 2 points here.
 
+### Surprise candidates, backtested
+
+The "surprise candidates" feature (rotating songs that are "due") had never been evaluated. `oracle/surprise.py` scores any ranking rule by precision@k: of the k rotating songs (play rate 5-50%) it names before a show, how many were actually played, versus the base rate of a random pick from the same pool. Backtest, 31 shows, k=5 (k=3 in brackets):
+
+| Ranking rule | Top-k played | Random pool pick |
+|---|---|---|
+| Due heuristic (recent rate minus overall rate, the old default) | 44.7% (44.1%) | 48.0% |
+| Longest gap since last played | 46.7% (43.0%) | 48.0% |
+| Recency-weighted probability | 54.6% (54.8%) | 48.0% |
+
+Finding: the original "due" heuristic is slightly worse than picking at random, and a gap-based rule is no better. In this synthetic tour songs are phased in and out rather than on a cycle, so being absent signals that a song is leaving, not that it is overdue. Ranking by recency probability beats the base rate by about 6.5 points at both k. That is only 155 picks, so the standard error is roughly 4 points: suggestive, not conclusive. The site now lists surprise candidates by the recency rule; `SetlistModel.surprise_candidates` is left unchanged for comparison.
+
 ### Explanations ("why this song?")
 
 `oracle/explain.py` gathers per-pick evidence from the shows (play count, recent appearances, shows since last played, recency-weighted probability) and renders it as a sentence. `TemplateExplainer` works offline and is what the site uses. `GeminiExplainer` asks an LLM to rephrase the same facts, takes an injectable `generate` callable, and falls back to the template when there is no `GEMINI_API_KEY` or the call fails. Because the numbers come from code, not from the model, an explanation cannot invent statistics.
@@ -141,6 +153,7 @@ This changes no predictions, so there is nothing to backtest: it is a presentati
 - [x] Tune the recency decay without leakage (inner walk-forward; ties the fixed 0.85 on synthetic data)
 - [x] Error analysis: reachable vs unreachable misses, most-missed songs (shown on the site)
 - [x] Set-length forecasting: predict how many songs, score the full pipeline with F1 (recency-aware forecast nearly matches knowing the true length; shown on the site)
+- [x] Backtest the surprise-candidate feature (the old "due" rule does not beat random; recency ranking does by ~6.5 points, within noise-ish; shown on the site)
 - [ ] Small web UI
 
 ## Config
