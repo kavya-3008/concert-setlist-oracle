@@ -13,6 +13,7 @@ from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
 from oracle.recency import RecencyModel
 from oracle.slots import SlotModel
+from oracle.surprise import RANKERS, recency_ranking, surprise_backtest
 from oracle.trend import TrendModel
 from oracle.tuning import TunedRecencyModel
 
@@ -33,7 +34,8 @@ cmp_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['overlap']:.0%}</td><td>{r['
 rel_rows = ''.join(f"<tr><td>{b['bin']}</td><td>{b['predicted']:.0%}</td><td>{b['observed']:.0%}</td><td>{b['n']}</td></tr>" for b in rel)
 
 setlist = "".join(f"<li>{escape(s)}</li>" for s in model.predict())
-surprise = "".join(f"<li>{escape(s)}</li>" for s in model.surprise_candidates())
+surprise = "".join(f"<li>{escape(s)}</li>" for s in recency_ranking(shows, 0.05, 0.5)[:5])
+sur_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['precision']:.0%}</td><td>{r['base_rate']:.0%}</td></tr>" for n, r in ((n, surprise_backtest(shows, f)) for n, f in RANKERS.items()))
 why_rows = ''.join(f"<tr><td>{escape(e.song)}</td><td>{e.probability:.0%}</td><td>{escape(TemplateExplainer().explain(e).split(': ', 1)[1])}</td></tr>" for e in gather_evidence(shows, model.predict()))
 rows = "".join(
     f'<tr><td>{escape(s.song)}</td><td><div class="bar"><span style="width:{s.play_rate*100:.0f}%"></span></div></td>'
@@ -69,6 +71,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note">Other tables are told the true set length; here the length is forecast first. Recent-weighted forecasts track the synthetic tour's growing sets; the overall mean runs short.</p></div>
 <h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
 <div class="grid"><div><table><tr><th>Most often missed</th><th>Shows</th></tr>{miss_rows}</table></div><div><table><tr><th>Most often wrongly picked</th><th>Shows</th></tr>{spur_rows}</table></div></div></div>
+<h2>Do the surprise picks land?</h2><div class="card"><table><tr><th>Ranking rule</th><th>Top-5 actually played</th><th>Random rotating song</th></tr>{sur_rows}</table>
+<p class="note">Each rule picks 5 rotating songs per show from earlier shows only. The old "due" rule did not beat a random pick; ranking by recent play probability did, by a few points on 31 synthetic shows. The list above uses that rule.</p></div>
 <h2>Are the probabilities honest?</h2><div class="card"><table><tr><th>Predicted bin</th><th>Avg predicted</th><th>Actually played</th><th>Cases</th></tr>{rel_rows}</table>
 <p class="note">Brier score: {br:.3f} (lower is better). Well-calibrated means the two percentage columns match. Isotonic recalibration (fit only on earlier shows) moves Brier from {br_raw:.4f} to {br_cal:.4f} on the same cases after a 3-fold warm-up: a small gain on this synthetic tour.</p></div>
 <h2>Every song</h2><div class="card"><table><tr><th>Song</th><th>Play rate</th><th></th><th>Set position</th></tr>{rows}</table>
