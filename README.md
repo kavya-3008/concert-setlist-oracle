@@ -28,6 +28,7 @@ python3 -m pytest
 | Recency + city (k=3) | 73% | 78% |
 | Recency, auto-tuned decay | 76% | 78% |
 | Recency + linear trend | 75% | 77% |
+| Recency + carry-over (k=3) | 75% | 80% |
 
 Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
 
@@ -86,6 +87,20 @@ Negative result: tuning is a tie (+0.07 points of overlap, well within noise on 
 | Trend, decay 1.0, shrink 1.0 | 75.7% | 77.5% |
 
 Negative result: no reliable gain. Across six settings song recovery ranges from 73.6% to 75.7% against 75.5% for plain recency, with no pattern in the settings (the single best one, +0.2 points, was picked in hindsight on 31 shows and is noise). Per-song 0/1 series are too noisy for a slope to be estimated from a few dozen shows, and the extrapolation mainly adds variance. Order accuracy moves up by about one point, but that comes from ranking probabilities differently, not from better song choice, so I would not read much into it. Kept as an informative baseline with unit tests for when a longer real tour is available.
+
+### Carry-over from the previous show
+
+`CarryoverModel` asks whether a song's chance depends on whether it was played at the previous show (negative for deliberate rotation, positive for songs being phased in). For each song it estimates P(play | played last show) and P(play | absent last show) from the history, shrunk toward the recency probability with strength `k`, and uses the one matching the last observed show. Backtest (31 shows), songs recovered / order accuracy:
+
+| Model | Songs recovered | Order accuracy |
+|---|---|---|
+| Recency (decay 0.85) | 75.5% | 76.5% |
+| Carry-over, k=1 | 72.9% | 80.4% |
+| Carry-over, k=3 (default) | 74.5% | 80.3% |
+| Carry-over, k=10 | 74.3% | 79.4% |
+| Carry-over, k=30 | 74.4% | 77.3% |
+
+Negative result: carry-over loses 1 to 2.6 points of song recovery at every shrinkage level, and the loss shrinks as k grows toward plain recency. A song's per-state rate rests on only a handful of transitions in a 36-show tour, so the estimate adds variance without a real signal to find. (Raw pooled rates look different, 72% after a play versus 45% after an absence, but that is mostly staples versus rare songs, not carry-over.) The order-accuracy rise of about 4 points comes from the model ranking probabilities differently, not from choosing better songs, so I would not read it as a win. Kept as an informative baseline with unit tests on alternating songs.
 
 ### Error analysis
 
@@ -154,6 +169,7 @@ This changes no predictions, so there is nothing to backtest: it is a presentati
 - [x] Error analysis: reachable vs unreachable misses, most-missed songs (shown on the site)
 - [x] Set-length forecasting: predict how many songs, score the full pipeline with F1 (recency-aware forecast nearly matches knowing the true length; shown on the site)
 - [x] Backtest the surprise-candidate feature (the old "due" rule does not beat random; recency ranking does by ~6.5 points, within noise-ish; shown on the site)
+- [x] Carry-over model: does playing a song last night change tonight's odds? (loses to recency on synthetic data; shown on the site)
 - [ ] Small web UI
 
 ## Config
