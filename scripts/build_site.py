@@ -13,6 +13,7 @@ from oracle.length import LENGTH_FORECASTERS, length_backtest
 from oracle.markov import MarkovModel
 from oracle.model import SetlistModel
 from oracle.recency import RecencyModel
+from oracle.significance import compare_to_reference
 from oracle.slots import SlotModel
 from oracle.surprise import RANKERS, recency_ranking, surprise_backtest
 from oracle.trend import TrendModel
@@ -22,6 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
 shows = load_shows(ROOT / "data/sample_tour.json")
 model = MarkovModel().fit(shows)
 res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel})
+sig = compare_to_reference(shows, {'Recency-weighted': RecencyModel, 'Frequency': SetlistModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel}, 'Recency-weighted')
+sig_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['diff']*100:+.1f}</td><td>{r['lo']*100:+.1f} to {r['hi']*100:+.1f}</td><td>{'yes' if r['significant'] else 'no'}</td></tr>" for n, r in sig.items())
 pairs = list(probability_pairs(shows))
 br = brier(pairs)
 rel = reliability(pairs)
@@ -68,6 +71,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note">Written from the tour's own counts. An optional Gemini explainer can rephrase the same evidence when a key is set; it is not used on this page.</p></div>
 <h2>Model comparison</h2><div class="card"><table><tr><th>Model</th><th>Songs recovered</th><th>Order accuracy</th></tr>{cmp_rows}</table>
 <p class="note">Order accuracy: of the songs both lists share, how many pairs are in the right relative order. Markov ordering does worse here because mid-set order in this synthetic tour is random; real tours should differ.</p></div>
+<h2>Is any model really better than recency?</h2><div class="card"><table><tr><th>Model vs recency</th><th>Mean diff (points)</th><th>95% interval</th><th>Distinguishable from 0?</th></tr>{sig_rows}</table>
+<p class="note">Paired bootstrap over the held-out shows (2000 resamples). Only the frequency baseline is reliably worse; every other model is within noise of recency (the Markov and per-slot models pick the same songs, so their difference is exactly 0).</p></div>
 <h2>How long will the show be?</h2><div class="card"><table><tr><th>Length forecast</th><th>Avg error (songs)</th><th>Bias</th><th>F1 of predicted set</th></tr>{len_rows}</table>
 <p class="note">Other tables are told the true set length; here the length is forecast first. Recent-weighted forecasts track the synthetic tour's growing sets; the overall mean runs short.</p></div>
 <h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
