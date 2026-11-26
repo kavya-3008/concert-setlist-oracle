@@ -5,6 +5,7 @@ from pathlib import Path
 from oracle.carryover import CarryoverModel
 from oracle.city import CityModel
 from oracle.data import load_shows
+from oracle.decision import SIZE_RULES, size_rule_backtest
 from oracle.calibration import brier, probability_pairs, recalibrated_pairs, reliability
 from oracle.errors import error_analysis
 from oracle.explain import gather_evidence, TemplateExplainer
@@ -31,6 +32,7 @@ rel = reliability(pairs)
 raw_cv, cal_cv = recalibrated_pairs(shows)
 br_raw, br_cal = brier(raw_cv), brier(cal_cv)
 len_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['mae']:.2f}</td><td>{r['bias']:+.2f}</td><td>{r['f1']:.1%}</td></tr>" for n, r in ((n, length_backtest(shows, f)) for n, f in LENGTH_FORECASTERS.items()))
+size_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['precision']:.1%}</td><td>{r['recall']:.1%}</td><td>{r['f1']:.1%}</td><td>{r['bias']:+.1f}</td></tr>" for n, r in ((n, size_rule_backtest(shows, f)) for n, f in SIZE_RULES.items()))
 ea = error_analysis(shows, RecencyModel)
 miss_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_missed'])
 spur_rows = ''.join(f"<tr><td>{escape(s)}</td><td>{n}</td></tr>" for s, n in ea['most_spurious'])
@@ -75,6 +77,8 @@ a{{color:var(--acc)}}.note{{color:var(--mut);font-size:.88rem}}</style></head><b
 <p class="note">Paired bootstrap over the held-out shows (2000 resamples). Only the frequency baseline is reliably worse; every other model is within noise of recency (the Markov and per-slot models pick the same songs, so their difference is exactly 0).</p></div>
 <h2>How long will the show be?</h2><div class="card"><table><tr><th>Length forecast</th><th>Avg error (songs)</th><th>Bias</th><th>F1 of predicted set</th></tr>{len_rows}</table>
 <p class="note">Other tables are told the true set length; here the length is forecast first. Recent-weighted forecasts track the synthetic tour's growing sets; the overall mean runs short.</p></div>
+<h2>Choosing the set size by expected F1</h2><div class="card"><table><tr><th>Size rule</th><th>Precision</th><th>Recall</th><th>F1</th><th>Avg size bias</th></tr>{size_rows}</table>
+<p class="note">No length forecast: songs are ranked by recency probability and the count that maximises expected F1 is taken. It over-predicts by about 2.6 songs and wins on F1 because recall gains outweigh the precision loss. Synthetic tour; compare with the length-forecast table above (best F1 75.5%).</p></div>
 <h2>Where do the misses come from?</h2><div class="card"><p style="margin-top:0">The recency model recovers {ea['overlap']:.0%} of played songs (pooled over {ea['shows_scored']} shows). Only songs never played earlier are out of reach, and that caps recovery at {ea['ceiling']:.0%}; just {ea['unreachable_share']:.0%} of misses are of that kind. The rest are rotation errors: songs it knew about but left out.</p>
 <div class="grid"><div><table><tr><th>Most often missed</th><th>Shows</th></tr>{miss_rows}</table></div><div><table><tr><th>Most often wrongly picked</th><th>Shows</th></tr>{spur_rows}</table></div></div></div>
 <h2>Do the surprise picks land?</h2><div class="card"><table><tr><th>Ranking rule</th><th>Top-5 actually played</th><th>Random rotating song</th></tr>{sur_rows}</table>
