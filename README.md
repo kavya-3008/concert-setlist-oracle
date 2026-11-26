@@ -142,6 +142,20 @@ Every backtest above is handed the true set length, which nobody has before the 
 
 Result: a recency-aware length forecast recovers nearly all of the loss from not knowing the length (F1 75.1-75.5% vs 75.5% with the true length), while the plain mean, the current CLI default, under-predicts by about half a song and costs about 1.8 points of F1. Caveats: the gaps between the two recency-aware forecasters are within noise on 31 shows, a decay sweep (0.5 to 0.9) moved F1 only between 74.9% and 75.7%, and mean absolute error is not better for the last-5 forecaster than the overall mean (the gain is in bias, which is what shifts precision against recall). The sum of the recency model's probabilities is mathematically identical to the decayed mean length, so it is not a separate row. Also, F1 with a true length equals the overlap metric used elsewhere, so the real finding is that length error costs under 2 points here.
 
+### Choosing the set size by expected F1
+
+Rather than forecast a length, `oracle/decision.py` ranks songs by recency probability and takes the k that maximises the approximate expected F1, `2 * (sum of top-k probabilities) / (k + sum of all probabilities)`. Thresholds on probability are the simpler alternative. Backtest, 31 shows, no true length used:
+
+| Size rule | Precision | Recall | F1 | Avg size bias (songs) |
+|---|---|---|---|---|
+| Expected-F1 optimal | 71.4% | 88.8% | 78.9% | +2.6 |
+| Threshold 0.4 | 71.2% | 88.5% | 78.6% | +2.6 |
+| Threshold 0.5 | 73.1% | 80.4% | 76.1% | +1.1 |
+| Threshold 0.6 | 76.4% | 69.3% | 72.0% | -1.0 |
+| (reference: decayed length forecast) | 75.9% | 74.9% | 75.1% | -0.2 |
+
+Result: a real gain on F1. Paired bootstrap against the decayed-length pipeline on per-show F1: +3.8 points, 95% interval +1.0 to +6.4 (excludes 0). The rule deliberately over-predicts by about 2.6 songs, trading precision for recall, which F1 rewards; if you want the exact-length "songs recovered" metric, or care more about precision, it is not the better choice. Caveats: synthetic tour, threshold 0.4 was close to the optimum (so the benefit is mostly "include coin-flip songs"), and the bootstrap treats shows as independent.
+
 ### Surprise candidates, backtested
 
 The "surprise candidates" feature (rotating songs that are "due") had never been evaluated. `oracle/surprise.py` scores any ranking rule by precision@k: of the k rotating songs (play rate 5-50%) it names before a show, how many were actually played, versus the base rate of a random pick from the same pool. Backtest, 31 shows, k=5 (k=3 in brackets):
@@ -187,6 +201,7 @@ This changes no predictions, so there is nothing to backtest: it is a presentati
 - [x] Backtest the surprise-candidate feature (the old "due" rule does not beat random; recency ranking does by ~6.5 points, within noise-ish; shown on the site)
 - [x] Carry-over model: does playing a song last night change tonight's odds? (loses to recency on synthetic data; shown on the site)
 - [x] Paired-bootstrap significance of every model vs recency (only recency > frequency is reliable; shown on the site)
+- [x] Expected-F1 set-size selection, no length forecast needed (+3.8 F1 points over the decayed-length pipeline, interval excludes 0; shown on the site)
 - [ ] Small web UI
 
 ## Config
