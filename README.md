@@ -29,6 +29,7 @@ python3 -m pytest
 | Recency, auto-tuned decay | 76% | 78% |
 | Recency + linear trend | 75% | 77% |
 | Recency + carry-over (k=3) | 75% | 80% |
+| Multi-timescale ensemble | 75% | 76% |
 
 Recency helps because songs enter and leave rotation. Markov ordering hurts here since mid-set order is random in this data: a reminder to test on real tours before trusting a fancier model.
 
@@ -101,6 +102,20 @@ Negative result: no reliable gain. Across six settings song recovery ranges from
 | Carry-over, k=30 | 74.4% | 77.3% |
 
 Negative result: carry-over loses 1 to 2.6 points of song recovery at every shrinkage level, and the loss shrinks as k grows toward plain recency. A song's per-state rate rests on only a handful of transitions in a 36-show tour, so the estimate adds variance without a real signal to find. (Raw pooled rates look different, 72% after a play versus 45% after an absence, but that is mostly staples versus rare songs, not carry-over.) The order-accuracy rise of about 4 points comes from the model ranking probabilities differently, not from choosing better songs, so I would not read it as a win. Kept as an informative baseline with unit tests on alternating songs.
+
+### Multi-timescale ensemble
+
+The recency decay is a guess about drift speed. `EnsembleModel` hedges it by averaging the probabilities of recency models at several decays (default 0.6, 0.85, 1.0), with no inner tuning loop. Backtest (31 shows), songs recovered / order accuracy / Brier score of the probabilities:
+
+| Model | Songs recovered | Order accuracy | Brier |
+|---|---|---|---|
+| Recency (decay 0.85) | 75.5% | 76.5% | 0.1987 |
+| Recency (decay 0.6) | 76.5% | 77.8% | 0.2207 |
+| Ensemble (0.6, 0.85, 1.0), default | 75.3% | 76.3% | 0.2015 |
+| Ensemble (0.5, 0.7, 0.9) | 75.6% | 77.6% | 0.2075 |
+| Ensemble (0.6, 1.0) | 74.9% | 76.7% | 0.2037 |
+
+Negative result: no gain. Paired bootstrap against recency 0.85 on song overlap: default ensemble -0.2 points (95% interval -1.7 to +1.3), the (0.5, 0.7, 0.9) ensemble +0.1 (-1.9 to +2.4). Brier is slightly worse for every ensemble (0.2015 to 0.2075 vs 0.1987), because averaging in fast decays makes probabilities noisier. The ensemble simply lands between its members, so it is a hedge against a badly chosen decay, not an improvement over a decent one. Kept as an informative baseline with unit tests.
 
 ### Is any gain real? Paired bootstrap
 
@@ -202,6 +217,7 @@ This changes no predictions, so there is nothing to backtest: it is a presentati
 - [x] Carry-over model: does playing a song last night change tonight's odds? (loses to recency on synthetic data; shown on the site)
 - [x] Paired-bootstrap significance of every model vs recency (only recency > frequency is reliable; shown on the site)
 - [x] Expected-F1 set-size selection, no length forecast needed (+3.8 F1 points over the decayed-length pipeline, interval excludes 0; shown on the site)
+- [x] Multi-timescale ensemble of recency models (ties recency on overlap, slightly worse Brier on synthetic data; shown on the site)
 - [ ] Small web UI
 
 ## Config
