@@ -7,6 +7,7 @@ from oracle.city import CityModel
 from oracle.data import load_shows
 from oracle.decision import SIZE_RULES, size_rule_backtest
 from oracle.calibration import brier, probability_pairs, recalibrated_pairs, reliability
+from oracle.ensemble import EnsembleModel
 from oracle.errors import error_analysis
 from oracle.explain import gather_evidence, TemplateExplainer
 from oracle.evaluate import compare
@@ -23,8 +24,8 @@ from oracle.tuning import TunedRecencyModel
 ROOT = Path(__file__).resolve().parent.parent
 shows = load_shows(ROOT / "data/sample_tour.json")
 model = MarkovModel().fit(shows)
-res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel})
-sig = compare_to_reference(shows, {'Recency-weighted': RecencyModel, 'Frequency': SetlistModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel}, 'Recency-weighted')
+res = compare(shows, {'Frequency': SetlistModel, 'Recency-weighted': RecencyModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel, 'Multi-timescale ensemble': EnsembleModel})
+sig = compare_to_reference(shows, {'Recency-weighted': RecencyModel, 'Frequency': SetlistModel, 'Recency + Markov order': MarkovModel, 'Per-slot (opener/closer)': SlotModel, 'Recency + city (k=3)': CityModel, 'Recency, auto-tuned decay': TunedRecencyModel, 'Recency + linear trend': TrendModel, 'Recency + carry-over (k=3)': CarryoverModel, 'Multi-timescale ensemble': EnsembleModel}, 'Recency-weighted')
 sig_rows = ''.join(f"<tr><td>{escape(n)}</td><td>{r['diff']*100:+.1f}</td><td>{r['lo']*100:+.1f} to {r['hi']*100:+.1f}</td><td>{'yes' if r['significant'] else 'no'}</td></tr>" for n, r in sig.items())
 pairs = list(probability_pairs(shows))
 br = brier(pairs)
